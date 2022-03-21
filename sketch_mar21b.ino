@@ -6,25 +6,18 @@
  *   DHT11 temperature + humidity sensor
 */
 
-int LDR_In = A0;
-int lightHoeveelheid;
-
-uint8_t Led1 = D3;
-uint8_t Led2 = D5;
-uint8_t Led3 = D6;
-
-int hoogsteLDR = 700;
-int laagsteLDR = 350;
 
 //        initialise temperature humidity sensor DHT11
 #include "DHT.h"
-#define DHTTYPE DHT11        // DHT 11 sensor
+#define DHTTYPE DHT11       // DHT 11 sensor
 uint8_t DHTPin = D7;        // DHT Sensor data input
 DHT dht(DHTPin, DHTTYPE);   // Initialize DHT sensor.    
 float Temperature;          // temperature
 float Humidity;             // humidity
 float HeatIndex;            // Heatindex
- 
+int LDR_In = A0;
+int lichtHoeveelheid;
+
 //      web server
 #include <ESP8266WiFi.h>
 #include <WiFiClient.h>
@@ -32,7 +25,7 @@ float HeatIndex;            // Heatindex
 ESP8266WebServer server(80); // maak een instantie van de webserver op poort 80
 
 // your data
-String studentName = "Daniel 33257 is mijn studie nummer"; // jouw student nummer + naam
+String studentName = "naam"; // jouw student nummer + naam
 
 const char* ssid = "Medialab";
 const char* password = "Mediacollege2";
@@ -57,6 +50,7 @@ void readDHT11(){
         Temperature = temperature;
         Humidity =  humidity ;
         HeatIndex = heatindex;
+        lichtHoeveelheid = analogRead(LDR_In);
         // show in Serial Monitor
         Serial.print("Temp. ");
         Serial.print(Temperature);
@@ -64,6 +58,9 @@ void readDHT11(){
         Serial.print(humidity);
         Serial.print("% Heatindex ");
         Serial.println(heatindex);
+        Serial.println(lichtHoeveelheid);
+        Serial.print("Lichthoeveelheid. lichtHoeveelheid  ");
+        
       }
  } 
 
@@ -97,7 +94,7 @@ void handleNotFound(){
 void handleSensor(){
   server.send(200, "text/html", "<h3>Duurzaam Huis: " 
    +  studentName + "</h3>Temperature " + String(Temperature) + 
-   " Celsius<br>Humidity " + String(Humidity) +  " %<br>Heatindex " + String(HeatIndex));
+   " Celsius<br>Humidity " + String(Humidity) +  " %<br>Heatindex " + String(HeatIndex) + "%<br>lichtHoeveelheid " + String(lichtHoeveelheid));
   }
 
 void setup(){
@@ -114,45 +111,11 @@ void setup(){
   server.on("/sensor", handleSensor);
  
   server.onNotFound(handleNotFound);
-
-  // put your setup code here, to run once:
-  Serial.begin(9600);
-  pinMode(Led1,OUTPUT);
-  pinMode(Led2,OUTPUT);
-  pinMode(Led3,OUTPUT);
-
 }
-
 
 void loop(){
   if (WiFi.status() != WL_CONNECTED) wifiConnect();// reconnect Wifi if necessary 
   server.handleClient();
   delay(3000);    //Send a request every XXX ms  DHT11 needs at least 2 seconds
   readDHT11();
-
-  // put your main code here, to run repeatedly:
-  lightHoeveelheid = analogRead(LDR_In);
-  Serial.println(lightHoeveelheid);
-
-  if (lightHoeveelheid < 0.75 * hoogsteLDR){
-    digitalWrite(Led1,HIGH);
-  }
-  else{
-    digitalWrite(Led1,LOW);
-  }
-  
-  if (lightHoeveelheid < 0.50 * hoogsteLDR){
-    digitalWrite(Led2,HIGH);
-  }
-  else{
-    digitalWrite(Led2,LOW);
-  }
-  
-  if (lightHoeveelheid < 0.25 * hoogsteLDR){
-    digitalWrite(Led3,HIGH);
-  }
-  else{
-    digitalWrite(Led3,LOW);
-  }
-  delay(1000);
 }
