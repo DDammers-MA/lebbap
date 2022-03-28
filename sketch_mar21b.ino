@@ -8,6 +8,7 @@
 
 
 //        initialise temperature humidity sensor DHT11
+
 #include "DHT.h"
 #define DHTTYPE DHT11       // DHT 11 sensor
 uint8_t DHTPin = D7;        // DHT Sensor data input
@@ -15,6 +16,7 @@ DHT dht(DHTPin, DHTTYPE);   // Initialize DHT sensor.
 float Temperature;          // temperature
 float Humidity;             // humidity
 float HeatIndex;            // Heatindex
+float kelvin;
 int LDR_In = A0;
 int lichtHoeveelheid;
 
@@ -25,7 +27,7 @@ int lichtHoeveelheid;
 ESP8266WebServer server(80); // maak een instantie van de webserver op poort 80
 
 // your data
-String studentName = "naam"; // jouw student nummer + naam
+String studentName = "Daniel"; // jouw student nummer + naam
 
 const char* ssid = "Medialab";
 const char* password = "Mediacollege2";
@@ -52,6 +54,8 @@ void readDHT11(){
         HeatIndex = heatindex;
         lichtHoeveelheid = analogRead(LDR_In);
         // show in Serial Monitor
+        kelvin = temperature + 273.15;
+        Serial.print(kelvin);
         Serial.print("Temp. ");
         Serial.print(Temperature);
         Serial.print("C. Humidity  ");
@@ -92,9 +96,7 @@ void handleNotFound(){
 }
 
 void handleSensor(){
-  server.send(200, "text/html", "<h3>Duurzaam Huis: " 
-   +  studentName + "</h3>Temperature " + String(Temperature) + 
-   " Celsius<br>Humidity " + String(Humidity) +  " %<br>Heatindex " + String(HeatIndex) + "%<br>lichtHoeveelheid " + String(lichtHoeveelheid));
+  server.send(200, "text/html", "<h3>Duurzaam Huis: "  +  studentName + "</h3>Temperature " + String(Temperature) + " Celsius<br>Humidity " + String(Humidity) +  " %<br>Heatindex " + String(HeatIndex) + "%<br>lichtHoeveelheid " + String(lichtHoeveelheid)+"%<br>kelvin " + String(kelvin));
   }
 
 void setup(){
